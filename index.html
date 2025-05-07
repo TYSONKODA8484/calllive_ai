@@ -6,7 +6,7 @@
     <title>Mordor Tourism - Voice Agent Challenge</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600&display=swap');
-        
+
         :root {
             --dark: #121212;
             --darker: #000000;
@@ -19,13 +19,13 @@
             --glow: rgba(255, 64, 0, 0.5);
             --radius: 4px;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             background-color: var(--dark);
             color: var(--text);
@@ -33,12 +33,12 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
             background-size: 20px 20px;
         }
-        
+
         #eye-container {
             position: fixed;
             top: 0;
@@ -51,19 +51,19 @@
             align-items: center;
             pointer-events: none;
         }
-        
+
         #eye {
             width: 600px;
             height: 600px;
             opacity: 0.1;
         }
-        
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 0 20px;
         }
-        
+
         header {
             background: rgba(18, 18, 18, 0.9);
             position: sticky;
@@ -72,13 +72,13 @@
             padding: 20px 0;
             border-bottom: 1px solid var(--grid);
         }
-        
+
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .logo {
             font-family: 'Space Mono', monospace;
             font-weight: 700;
@@ -89,7 +89,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .ring {
             width: 20px;
             height: 20px;
@@ -97,13 +97,13 @@
             border-radius: 50%;
             display: inline-block;
         }
-        
+
         nav ul {
             display: flex;
             list-style: none;
             gap: 30px;
         }
-        
+
         nav ul li a {
             color: var(--text-secondary);
             text-decoration: none;
@@ -113,11 +113,29 @@
             letter-spacing: 1px;
             transition: all 0.2s ease;
         }
-        
+
         nav ul li a:hover {
             color: var(--accent);
         }
-        
+
+        #notification-bar {
+            background-color: rgba(255, 64, 0, 0.15); /* Use a slightly transparent accent color */
+            color: var(--text); /* Use the standard text color */
+            padding: 10px 20px;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            border-bottom: 1px solid var(--accent); /* Add a border for visual separation */
+            z-index: 99; /* Ensure it's below the header but above content */
+        }
+
+        #notification-bar .endpoint-url {
+            color: var(--accent-secondary); /* Highlight the URL */
+            font-weight: 700;
+            text-shadow: 0 0 3px rgba(255, 215, 0, 0.3); /* Slight glow effect */
+        }
+
+
         .hero {
             min-height: calc(100vh - 80px);
             display: flex;
@@ -125,11 +143,11 @@
             padding: 60px 0;
             position: relative;
         }
-        
+
         .hero-content {
             max-width: 700px;
         }
-        
+
         h1 {
             font-family: 'Space Mono', monospace;
             font-size: 3.5rem;
@@ -139,12 +157,12 @@
             color: var(--text);
             position: relative;
         }
-        
+
         h1 span {
             display: block;
             color: var(--accent);
         }
-        
+
         .tag {
             display: inline-block;
             padding: 4px 8px;
@@ -157,7 +175,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .hero p {
             font-size: 18px;
             line-height: 1.6;
@@ -165,7 +183,7 @@
             margin-bottom: 32px;
             max-width: 600px;
         }
-        
+
         .scanline {
             position: absolute;
             top: 0;
@@ -177,7 +195,7 @@
             pointer-events: none;
             z-index: 100;
         }
-        
+
         @keyframes scanline {
             0% {
                 transform: translateY(-100vh);
@@ -186,7 +204,7 @@
                 transform: translateY(100vh);
             }
         }
-        
+
         .crt-effect {
             position: fixed;
             top: 0;
@@ -201,7 +219,7 @@
                 transparent 2px
             );
         }
-        
+
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -217,28 +235,28 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .btn:hover {
             border-color: var(--accent);
             color: var(--accent);
         }
-        
+
         .btn-primary {
             background-color: var(--accent);
             border-color: var(--accent);
             color: white;
             margin-right: 16px;
         }
-        
+
         .btn-primary:hover {
             background-color: transparent;
         }
-        
+
         section {
             padding: 80px 0;
             position: relative;
         }
-        
+
         .section-title {
             font-family: 'Space Mono', monospace;
             font-size: 2.5rem;
@@ -249,7 +267,7 @@
             position: relative;
             display: inline-block;
         }
-        
+
         .section-title::after {
             content: '';
             position: absolute;
@@ -259,21 +277,21 @@
             height: 3px;
             background-color: var(--accent);
         }
-        
+
         .section-subtitle {
             font-size: 18px;
             color: var(--text-secondary);
             max-width: 700px;
             margin-bottom: 40px;
         }
-        
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 24px;
             margin-top: 40px;
         }
-        
+
         .card {
             background: var(--surface);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -282,7 +300,7 @@
             height: 100%;
             position: relative;
         }
-        
+
         .card::before {
             content: '';
             position: absolute;
@@ -295,35 +313,35 @@
             transform-origin: left;
             transition: transform 0.3s ease;
         }
-        
+
         .card:hover::before {
             transform: scaleX(1);
         }
-        
+
         .card h3 {
             font-family: 'Space Mono', monospace;
             font-size: 20px;
             margin-bottom: 16px;
             color: var(--text);
         }
-        
+
         .card-icon {
             font-size: 22px;
             margin-bottom: 20px;
             color: var(--accent);
             display: inline-block;
         }
-        
+
         .card-list {
             list-style-type: none;
         }
-        
+
         .card-list li {
             margin-bottom: 8px;
             position: relative;
             padding-left: 20px;
         }
-        
+
         .card-list li::before {
             content: '>';
             position: absolute;
@@ -331,18 +349,18 @@
             color: var(--accent);
             font-family: 'Space Mono', monospace;
         }
-        
+
         .tab-container {
             margin-top: 40px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .tabs {
             display: flex;
             overflow-x: auto;
             background-color: rgba(0, 0, 0, 0.2);
         }
-        
+
         .tab-btn {
             background: none;
             border: none;
@@ -355,21 +373,21 @@
             white-space: nowrap;
             border-right: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .tab-btn.active {
             background-color: var(--surface);
             color: var(--accent);
         }
-        
+
         .tab-content {
             display: none;
             padding: 24px;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         .code-block {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -381,7 +399,7 @@
             font-size: 14px;
             line-height: 1.5;
         }
-        
+
         .code-block::before {
             content: '';
             position: absolute;
@@ -396,7 +414,7 @@
             );
             pointer-events: none;
         }
-        
+
         .code-header {
             display: flex;
             justify-content: space-between;
@@ -406,36 +424,36 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             font-size: 12px;
         }
-        
+
         .code-title {
             font-weight: bold;
             color: var(--text-secondary);
         }
-        
+
         .code-lang {
             color: var(--accent);
             padding: 2px 6px;
             background: rgba(255, 64, 0, 0.1);
             border-radius: 2px;
         }
-        
+
         pre, code {
             font-family: 'Space Mono', monospace;
             font-size: 13px;
             line-height: 1.5;
             color: var(--text);
         }
-        
+
         .comment { color: #6a9955; }
         .keyword { color: #cc99cd; }
         .string { color: #ce9178; }
         .function { color: #dcdc8b; }
         .variable { color: #9cdcfe; }
-        
+
         .glow {
             text-shadow: 0 0 5px var(--glow);
         }
-        
+
         .terminal {
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 16px;
@@ -443,7 +461,7 @@
             margin: 40px 0;
             background-color: rgba(0, 0, 0, 0.5);
         }
-        
+
         .terminal-header {
             position: absolute;
             top: 0;
@@ -456,36 +474,36 @@
             color: var(--text-secondary);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .terminal-content {
             margin-top: 30px;
             font-family: 'Space Mono', monospace;
             font-size: 14px;
             line-height: 1.6;
         }
-        
+
         .terminal-prompt {
             color: var(--accent-secondary);
             margin-right: 8px;
         }
-        
+
         .terminal-line {
             margin-bottom: 8px;
         }
-        
+
         .timeline {
             max-width: 700px;
             margin: 40px auto 0;
             padding: 0 20px;
         }
-        
+
         .timeline-item {
             margin-bottom: 30px;
             border-left: 1px solid rgba(255, 255, 255, 0.1);
             padding-left: 20px;
             position: relative;
         }
-        
+
         .timeline-item::before {
             content: '';
             position: absolute;
@@ -495,33 +513,33 @@
             height: 9px;
             background: var(--accent);
         }
-        
+
         .timeline-date {
             font-family: 'Space Mono', monospace;
             font-size: 14px;
             color: var(--accent-secondary);
             margin-bottom: 4px;
         }
-        
+
         .timeline-content {
             background: var(--surface);
             padding: 16px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .timeline-content h3 {
             font-family: 'Space Mono', monospace;
             font-size: 18px;
             margin-bottom: 8px;
         }
-        
+
         footer {
             padding: 40px 0;
             text-align: center;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             margin-top: 80px;
         }
-        
+
         .footer-content {
             display: flex;
             justify-content: space-between;
@@ -529,7 +547,7 @@
             flex-wrap: wrap;
             gap: 20px;
         }
-        
+
         .footer-logo {
             font-family: 'Space Mono', monospace;
             font-weight: 700;
@@ -539,12 +557,12 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .footer-links {
             display: flex;
             gap: 20px;
         }
-        
+
         .footer-links a {
             color: var(--text-secondary);
             text-decoration: none;
@@ -554,11 +572,11 @@
             letter-spacing: 1px;
             transition: all 0.2s ease;
         }
-        
+
         .footer-links a:hover {
             color: var(--accent);
         }
-        
+
         .copyright {
             width: 100%;
             margin-top: 20px;
@@ -566,11 +584,11 @@
             color: var(--text-secondary);
             font-family: 'Space Mono', monospace;
         }
-        
+
         .crt-flicker {
             animation: flicker 0.15s infinite alternate;
         }
-        
+
         @keyframes flicker {
             0% {
                 opacity: 0.99;
@@ -579,43 +597,43 @@
                 opacity: 1.0;
             }
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 gap: 16px;
             }
-            
+
             nav ul {
                 gap: 16px;
                 flex-wrap: wrap;
                 justify-content: center;
             }
-            
+
             h1 {
                 font-size: 2.5rem;
             }
-            
+
             .btn {
                 display: block;
                 width: 100%;
                 margin-bottom: 16px;
                 text-align: center;
             }
-            
+
             .btn-primary {
                 margin-right: 0;
             }
-            
+
             .grid {
                 grid-template-columns: 1fr;
             }
-            
+
             section {
                 padding: 60px 0;
             }
-            
+
             #eye {
                 width: 300px;
                 height: 300px;
@@ -626,7 +644,7 @@
 <body>
     <div class="scanline"></div>
     <div class="crt-effect"></div>
-    
+
     <div id="eye-container">
         <svg id="eye" viewBox="0 0 100 100">
             <defs>
@@ -635,17 +653,17 @@
                     <stop offset="80%" stop-color="#ff4000" stop-opacity="0" />
                 </radialGradient>
             </defs>
-            
+
             <ellipse cx="50" cy="50" rx="45" ry="35" fill="none" stroke="#ff4000" stroke-width="0.5" opacity="0.8">
                 <animate attributeName="rx" values="45;47;45" dur="4s" repeatCount="indefinite" />
                 <animate attributeName="ry" values="35;37;35" dur="4s" repeatCount="indefinite" />
             </ellipse>
-            
+
             <ellipse cx="50" cy="50" rx="30" ry="25" fill="url(#eyeGradient)">
                 <animate attributeName="rx" values="30;32;30" dur="3s" repeatCount="indefinite" />
                 <animate attributeName="ry" values="25;27;25" dur="3s" repeatCount="indefinite" />
             </ellipse>
-            
+
             <circle cx="50" cy="50" r="15" fill="#000000" id="pupil">
                 <animate attributeName="r" values="15;13;15" dur="2s" repeatCount="indefinite" />
                 <animate attributeName="cx" values="50;51;50;49;50" dur="5s" repeatCount="indefinite" />
@@ -673,6 +691,10 @@
         </div>
     </header>
 
+    <div id="notification-bar">
+        IMPORTANT: The API endpoint URL has been changed to: <span class="endpoint-url">https://relaxing-needed-vulture.ngrok-free.app</span>
+    </div>
+
     <section class="hero">
         <div class="container">
             <div class="hero-content">
@@ -689,7 +711,7 @@
         <div class="container">
             <h2 class="section-title">THE CHALLENGE</h2>
             <p class="section-subtitle">As Middle-earth's most active volcanic destination experiences unprecedented visitor interest, we need robust systems to handle tourist inquiries.</p>
-            
+
             <div class="terminal">
                 <div class="terminal-header">mordor-tourism ~ voice-agent-challenge</div>
                 <div class="terminal-content">
@@ -716,7 +738,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="grid">
                 <div class="card">
                     <div class="card-icon">🧠</div>
@@ -728,7 +750,7 @@
                         <li>Identify action items and follow-up requirements</li>
                     </ul>
                 </div>
-                
+
                 <div class="card">
                     <div class="card-icon">⚙️</div>
                     <h3>SYSTEM DESIGN</h3>
@@ -739,7 +761,7 @@
                         <li>Store both raw and processed data</li>
                     </ul>
                 </div>
-                
+
                 <div class="card">
                     <div class="card-icon">🔥</div>
                     <h3>TECH STACK</h3>
@@ -758,7 +780,7 @@
         <div class="container">
             <h2 class="section-title">THE EYE OF SAURON API</h2>
             <p class="section-subtitle">Our all-seeing API provides endpoints for receiving transcripts and submitting processed results.</p>
-            
+
             <div class="tab-container">
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="authentication">AUTHENTICATION</button>
@@ -766,7 +788,7 @@
                     <button class="tab-btn" data-tab="models">DATA MODELS</button>
                     <button class="tab-btn" data-tab="examples">EXAMPLES</button>
                 </div>
-                
+
                 <div id="authentication" class="tab-content active">
                     <div class="code-block">
                         <div class="code-header">
@@ -778,7 +800,7 @@
 <span class="variable">Authorization:</span> Bearer <span class="string">md-5f37e2a8c91b4eeba327dfe51f91ae05</span>
 <span class="variable">Content-Type:</span> application/json</code></pre>
                     </div>
-                    
+
                     <div class="terminal">
                         <div class="terminal-header">Authentication Notes</div>
                         <div class="terminal-content">
@@ -797,7 +819,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="endpoints" class="tab-content">
                     <div class="code-block">
                         <div class="code-header">
@@ -820,7 +842,7 @@
 <span class="comment"># Health check endpoint</span>
 <span class="keyword">GET</span> /api/v1/health</code></pre>
                     </div>
-                    
+
                     <div class="card" style="margin-top: 20px;">
                         <h3>RATE LIMITS</h3>
                         <ul class="card-list">
@@ -830,7 +852,7 @@
                         </ul>
                     </div>
                 </div>
-                
+
                 <div id="models" class="tab-content">
                     <div class="code-block">
                         <div class="code-header">
@@ -875,7 +897,7 @@
   }
 }</code></pre>
                     </div>
-                    
+
                     <div class="code-block">
                         <div class="code-header">
                             <div class="code-title">PROCESSED RESULT MODEL</div>
@@ -914,7 +936,7 @@
 }</code></pre>
                     </div>
                 </div>
-                
+
                 <div id="examples" class="tab-content">
                     <div class="code-block">
                         <div class="code-header">
@@ -933,25 +955,25 @@ logger = logging.getLogger(<span class="string">"mordor-api"</span>)
 <span class="keyword">class</span> <span class="function">MordorAPIClient</span>:
     <span class="keyword">def</span> <span class="function">__init__</span>(self, api_key: str):
         self.api_key = api_key
-        self.base_url = <span class="string">"https://api.mordor-tourism.me/v1"</span>
+        self.base_url = <span class="string">"https://api.mordor-tourism.me/v1"</span> <span class="comment"># Note: Update this base_url with the new endpoint!</span>
         self.headers = {
             <span class="string">"Authorization"</span>: <span class="string">f"Bearer {api_key}"</span>,
             <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>
         }
-    
+
     <span class="keyword">async def</span> <span class="function">receive_transcripts</span>(self) -> AsyncGenerator[Dict[str, Any], None]:
         <span class="comment"># Stream transcripts from the API</span>
         <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
             <span class="keyword">try</span>:
                 <span class="keyword">async with</span> session.get(
-                    <span class="string">f"{self.base_url}/transcripts/stream"</span>, 
+                    <span class="string">f"{self.base_url}/transcripts/stream"</span>,
                     headers=self.headers
                 ) <span class="keyword">as</span> response:
                     <span class="keyword">if</span> response.status != 200:
                         error_text = <span class="keyword">await</span> response.text()
                         logger.error(<span class="string">f"Failed to fetch transcripts: {response.status} - {error_text}"</span>)
                         <span class="keyword">return</span>
-                        
+
                     <span class="keyword">async for</span> line <span class="keyword">in</span> response.content:
                         <span class="keyword">if</span> line:
                             <span class="keyword">try</span>:
@@ -961,13 +983,13 @@ logger = logging.getLogger(<span class="string">"mordor-api"</span>)
                                 logger.error(<span class="string">f"Failed to parse transcript JSON: {e}"</span>)
             <span class="keyword">except</span> aiohttp.ClientError <span class="keyword">as</span> e:
                 logger.error(<span class="string">f"Connection error: {e}"</span>)
-    
+
     <span class="keyword">async def</span> <span class="function">submit_processed_result</span>(self, result: Dict[str, Any]) -> Dict[str, Any]:
         <span class="comment"># Submit processed results back to the API</span>
         <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
             <span class="keyword">try</span>:
                 <span class="keyword">async with</span> session.post(
-                    <span class="string">f"{self.base_url}/transcripts/process"</span>, 
+                    <span class="string">f"{self.base_url}/transcripts/process"</span>,
                     headers=self.headers,
                     json=result
                 ) <span class="keyword">as</span> response:
@@ -975,31 +997,31 @@ logger = logging.getLogger(<span class="string">"mordor-api"</span>)
                         error_text = <span class="keyword">await</span> response.text()
                         logger.error(<span class="string">f"Failed to submit results: {response.status} - {error_text}"</span>)
                         <span class="keyword">return</span> {<span class="string">"error"</span>: error_text}
-                    
+
                     <span class="keyword">return await</span> response.json()
             <span class="keyword">except</span> aiohttp.ClientError <span class="keyword">as</span> e:
                 logger.error(<span class="string">f"Connection error: {e}"</span>)
                 <span class="keyword">return</span> {<span class="string">"error"</span>: str(e)}
-    
+
     <span class="keyword">async def</span> <span class="function">get_stats</span>(self) -> Dict[str, Any]:
         <span class="comment"># Get processing statistics</span>
         <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
-            <span class="keyword">try</span>:
+            <span class="keyword">try:</span>
                 <span class="keyword">async with</span> session.get(
-                    <span class="string">f"{self.base_url}/stats"</span>, 
+                    <span class="string">f"{self.base_url}/stats"</span>,
                     headers=self.headers
                 ) <span class="keyword">as</span> response:
                     <span class="keyword">if</span> response.status != 200:
                         error_text = <span class="keyword">await</span> response.text()
                         logger.error(<span class="string">f"Failed to fetch stats: {response.status} - {error_text}"</span>)
                         <span class="keyword">return</span> {<span class="string">"error"</span>: error_text}
-                    
+
                     <span class="keyword">return await</span> response.json()
             <span class="keyword">except</span> aiohttp.ClientError <span class="keyword">as</span> e:
                 logger.error(<span class="string">f"Connection error: {e}"</span>)
                 <span class="keyword">return</span> {<span class="string">"error"</span>: str(e)}</code></pre>
                     </div>
-                    
+
                     <div class="code-block">
                         <div class="code-header">
                             <div class="code-title">USAGE EXAMPLE</div>
@@ -1022,7 +1044,7 @@ logging.basicConfig(
     <span class="comment"># 1. Use an LLM to generate a summary</span>
     <span class="comment"># 2. Extract structured data</span>
     <span class="comment"># 3. Perform sentiment analysis</span>
-    
+
     <span class="comment"># This is a mock processed result</span>
     <span class="keyword">return</span> {
         <span class="string">"transcript_id"</span>: transcript[<span class="string">"transcript_id"</span>],
@@ -1042,19 +1064,20 @@ logging.basicConfig(
 
 <span class="keyword">async def</span> <span class="function">main</span>():
     <span class="comment"># Initialize the client with your API key</span>
+    <span class="comment"># Note: Update the MordorAPIClient initialization with the new endpoint URL!</span>
     client = MordorAPIClient(<span class="string">"md-5f37e2a8c91b4eeba327dfe51f91ae05"</span>)
-    
+
     <span class="comment"># Process a batch of transcripts</span>
     <span class="keyword">async for</span> transcript <span class="keyword">in</span> client.receive_transcripts():
         logging.info(<span class="string">f"Received transcript: {transcript['transcript_id']}"</span>)
-        
+
         <span class="comment"># Process the transcript</span>
         processed_result = <span class="keyword">await</span> process_transcript(transcript)
-        
+
         <span class="comment"># Submit the result back to the API</span>
         response = <span class="keyword">await</span> client.submit_processed_result(processed_result)
         logging.info(<span class="string">f"Submitted result for {transcript['transcript_id']}: {response}"</span>)
-    
+
     <span class="comment"># Get processing stats</span>
     stats = <span class="keyword">await</span> client.get_stats()
     logging.info(<span class="string">f"Processing stats: {stats}"</span>)
@@ -1071,7 +1094,7 @@ logging.basicConfig(
         <div class="container">
             <h2 class="section-title">REPOSITORY</h2>
             <p class="section-subtitle">Fork our starter repository to begin your journey into the fires of Mount Doom.</p>
-            
+
             <div class="code-block">
                 <div class="code-header">
                     <div class="code-title">REPOSITORY STRUCTURE</div>
@@ -1112,7 +1135,7 @@ logging.basicConfig(
 ├── Dockerfile                <span class="comment"># Container definition</span>
 └── docker-compose.yml        <span class="comment"># Service orchestration</span></code></pre>
             </div>
-            
+
             <div class="card" style="margin-top: 32px;">
                 <h3>GETTING STARTED</h3>
                 <div class="terminal-content" style="margin-top: 16px;">
@@ -1137,7 +1160,7 @@ logging.basicConfig(
         <div class="container">
             <h2 class="section-title">TIMELINE</h2>
             <p class="section-subtitle">One does not simply complete this challenge without proper planning.</p>
-            
+
             <div class="timeline">
                 <div class="timeline-item">
                     <div class="timeline-date">DAY 1</div>
@@ -1146,7 +1169,7 @@ logging.basicConfig(
                         <p>Fork the repository and familiarize yourself with the requirements.</p>
                     </div>
                 </div>
-                
+
                 <div class="timeline-item">
                     <div class="timeline-date">DAY 1-3</div>
                     <div class="timeline-content">
@@ -1154,7 +1177,7 @@ logging.basicConfig(
                         <p>Plan your architecture, choose technologies, and set up basic infrastructure.</p>
                     </div>
                 </div>
-                
+
                 <div class="timeline-item">
                     <div class="timeline-date">DAY 3-5</div>
                     <div class="timeline-content">
@@ -1162,7 +1185,7 @@ logging.basicConfig(
                         <p>Develop the core functionality, integrate with LLM providers, and set up data processing.</p>
                     </div>
                 </div>
-                
+
                 <div class="timeline-item">
                     <div class="timeline-date">DAY 5-6</div>
                     <div class="timeline-content">
@@ -1170,7 +1193,7 @@ logging.basicConfig(
                         <p>Test with mock data, optimize for performance, and ensure scalability requirements are met.</p>
                     </div>
                 </div>
-                
+
                 <div class="timeline-item">
                     <div class="timeline-date">DAY 7</div>
                     <div class="timeline-content">
@@ -1196,7 +1219,7 @@ logging.basicConfig(
                     <a href="#timeline">TIMELINE</a>
                 </div>
                 <div class="copyright">
-                    &copy; 2025 MORDOR TOURISM BUREAU. ALL RIGHTS RESERVED. ONE API TO RULE THEM ALL.
+                    © 2025 MORDOR TOURISM BUREAU. ALL RIGHTS RESERVED. ONE API TO RULE THEM ALL.
                 </div>
             </div>
         </div>
@@ -1207,27 +1230,27 @@ logging.basicConfig(
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize all tabs
             initTabs();
-            
+
             // Eye following cursor effect
             initEyeTracking();
         });
-        
+
         // Tab switching functionality
         function initTabs() {
             document.querySelectorAll('.tab-btn').forEach(button => {
                 button.addEventListener('click', () => {
                     const tabId = button.getAttribute('data-tab');
-                    
+
                     // Hide all tab contents
                     document.querySelectorAll('.tab-content').forEach(content => {
                         content.classList.remove('active');
                     });
-                    
+
                     // Remove active class from all buttons
                     document.querySelectorAll('.tab-btn').forEach(btn => {
                         btn.classList.remove('active');
                     });
-                    
+
                     // Show the selected tab content
                     const selectedTab = document.getElementById(tabId);
                     if (selectedTab) {
@@ -1235,27 +1258,27 @@ logging.basicConfig(
                     } else {
                         console.error(`Tab content with id ${tabId} not found`);
                     }
-                    
+
                     // Add active class to the clicked button
                     button.classList.add('active');
                 });
             });
         }
-        
+
         // Eye following cursor effect
         function initEyeTracking() {
             document.addEventListener('mousemove', (e) => {
                 const eye = document.getElementById('eye');
                 if (!eye) return;
-                
+
                 const eyeCenter = {
                     x: eye.getBoundingClientRect().left + eye.getBoundingClientRect().width / 2,
                     y: eye.getBoundingClientRect().top + eye.getBoundingClientRect().height / 2
                 };
-                
+
                 const angle = Math.atan2(e.clientY - eyeCenter.y, e.clientX - eyeCenter.x);
                 const distance = Math.min(5, Math.sqrt(Math.pow(e.clientX - eyeCenter.x, 2) + Math.pow(e.clientY - eyeCenter.y, 2)) / 50);
-                
+
                 const pupil = document.getElementById('pupil');
                 if (pupil) {
                     pupil.setAttribute('cx', 50 + Math.cos(angle) * distance);
