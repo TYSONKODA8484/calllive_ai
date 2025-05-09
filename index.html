@@ -449,6 +449,9 @@
         .string { color: #ce9178; }
         .function { color: #dcdc8b; }
         .variable { color: #9cdcfe; }
+        .number { color: #b5cea8; }
+        .boolean { color: #569cd6; }
+
 
         .glow {
             text-shadow: 0 0 5px var(--glow);
@@ -790,16 +793,30 @@
                 </div>
 
                 <div id="authentication" class="tab-content active">
+                    <p>Access to the Eye of Sauron API requires authentication. You must first exchange your unique API key for a bearer token.</p>
                     <div class="code-block">
                         <div class="code-header">
-                            <div class="code-title">API AUTHENTICATION</div>
+                            <div class="code-title">OBTAINING AN AUTH TOKEN</div>
+                            <div class="code-lang">CURL</div>
+                        </div>
+                        <pre><code><span class="keyword">curl</span> --location <span class="string">'https://relaxing-needed-vulture.ngrok-free.app/api/auth'</span> \
+--header <span class="string">'Content-Type: application/json'</span> \
+--data <span class="string">'{"api_key": "candidate-api-key-587e61ac"}'</span></code></pre>
+                    </div>
+
+                     <p>Use the received token in the `Authorization` header for all subsequent API calls.</p>
+
+                    <div class="code-block">
+                        <div class="code-header">
+                            <div class="code-title">AUTHENTICATION HEADER</div>
                             <div class="code-lang">HTTP</div>
                         </div>
-                        <pre><code><span class="comment"># All requests to the Eye of Sauron API require authentication</span>
-<span class="keyword">GET</span> /api/v1/transcripts
-<span class="variable">Authorization:</span> Bearer <span class="string">md-5f37e2a8c91b4eeba327dfe51f91ae05</span>
+                        <pre><code><span class="comment"># Example using the obtained token</span>
+<span class="keyword">GET</span> /api/v1/transcripts/stream
+<span class="variable">Authorization:</span> Bearer <span class="string">YOUR_OBTAINED_TOKEN_HERE</span>
 <span class="variable">Content-Type:</span> application/json</code></pre>
                     </div>
+
 
                     <div class="terminal">
                         <div class="terminal-header">Authentication Notes</div>
@@ -807,14 +824,20 @@
                             <div class="terminal-line">
                                 <span class="terminal-prompt">></span> Your API key is forged in the fires of Mount Doom
                             </div>
+                             <div class="terminal-line">
+                                <span class="terminal-prompt">></span> Exchange your API key for a time-limited Bearer token using the /api/auth endpoint.
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">></span> Use the Bearer token in the Authorization header for all subsequent API calls.
+                            </div>
                             <div class="terminal-line">
                                 <span class="terminal-prompt">></span> Each key is bound to a specific developer
                             </div>
                             <div class="terminal-line">
-                                <span class="terminal-prompt">></span> Keys follow format: md-{32 character hex string}
+                                <span class="terminal-prompt">></span> Keys follow format: md-{32 character hex string} (Note: The example API key above is for demonstration purposes)
                             </div>
                             <div class="terminal-line">
-                                <span class="terminal-prompt">></span> Keep it secret. Keep it safe.
+                                <span class="terminal-prompt">></span> Keep your API key secret. Keep it safe.
                             </div>
                         </div>
                     </div>
@@ -826,18 +849,23 @@
                             <div class="code-title">AVAILABLE ENDPOINTS</div>
                             <div class="code-lang">HTTP</div>
                         </div>
-                        <pre><code><span class="comment"># Receive transcripts from streaming endpoint</span>
+                        <pre><code><span class="comment"># Obtain an authentication token using your API key</span>
+<span class="keyword">POST</span> /api/auth
+<span class="variable">Content-Type:</span> application/json
+<span class="comment"># Body: {"api_key": "YOUR_API_KEY"}</span>
+
+<span class="comment"># Receive transcripts from streaming endpoint</span>
 <span class="keyword">GET</span> /api/v1/transcripts/stream
-<span class="variable">Authorization:</span> Bearer <span class="string">md-5f37e2a8c91b4eeba327dfe51f91ae05</span>
+<span class="variable">Authorization:</span> Bearer <span class="string">YOUR_OBTAINED_TOKEN</span>
 
 <span class="comment"># Submit processed results</span>
 <span class="keyword">POST</span> /api/v1/transcripts/process
 <span class="variable">Content-Type:</span> application/json
-<span class="variable">Authorization:</span> Bearer <span class="string">md-5f37e2a8c91b4eeba327dfe51f91ae05</span>
+<span class="variable">Authorization:</span> Bearer <span class="string">YOUR_OBTAINED_TOKEN</span>
 
 <span class="comment"># Get processing statistics</span>
 <span class="keyword">GET</span> /api/v1/stats
-<span class="variable">Authorization:</span> Bearer <span class="string">md-5f37e2a8c91b4eeba327dfe51f91ae05</span>
+<span class="variable">Authorization:</span> Bearer <span class="string">YOUR_OBTAINED_TOKEN</span>
 
 <span class="comment"># Health check endpoint</span>
 <span class="keyword">GET</span> /api/v1/health</code></pre>
@@ -884,11 +912,11 @@
   ],
   <span class="string">"metadata"</span>: {
     <span class="string">"questionnaire"</span>: {
-      <span class="string">"purpose_of_visit_asked"</span>: <span class="keyword">true</span>,
-      <span class="string">"experience_assessed"</span>: <span class="keyword">true</span>,
-      <span class="string">"risk_acknowledged"</span>: <span class="keyword">true</span>,
-      <span class="string">"gear_discussed"</span>: <span class="keyword">true</span>,
-      <span class="string">"any_items_to_dispose_of_asked"</span>: <span class="keyword">true</span>
+      <span class="string">"purpose_of_visit_asked"</span>: <span class="boolean">true</span>,
+      <span class="string">"experience_assessed"</span>: <span class="boolean">true</span>,
+      <span class="string">"risk_acknowledged"</span>: <span class="boolean">true</span>,
+      <span class="string">"gear_discussed"</span>: <span class="boolean">true</span>,
+      <span class="string">"any_items_to_dispose_of_asked"</span>: <span class="boolean">true</span>
     },
     <span class="string">"visitor_interest_level"</span>: <span class="string">"high"</span>,
     <span class="string">"potential_issue"</span>: <span class="string">"naive"</span>,
@@ -908,18 +936,18 @@
   <span class="string">"summary"</span>: <span class="string">"Customer expressed high interest in visiting Mount Doom as a tourist attraction but demonstrated limited knowledge of hazards and inadequate preparation. Agent assessed customer as naive with moderate physical fitness and insufficient emergency planning. Customer ultimately decided to reconsider the journey after learning about permit requirements and dangers."</span>,
   <span class="string">"structured_data"</span>: {
     <span class="string">"visitor_details"</span>: {
-      <span class="string">"ring_bearer"</span>: <span class="keyword">false</span>,
-      <span class="string">"gear_prepared"</span>: <span class="keyword">false</span>,
+      <span class="string">"ring_bearer"</span>: <span class="boolean">false</span>,
+      <span class="string">"gear_prepared"</span>: <span class="boolean">false</span>,
       <span class="string">"hazard_knowledge"</span>: <span class="string">"limited"</span>,
       <span class="string">"fitness_level"</span>: <span class="string">"moderate"</span>,
       <span class="string">"permit_status"</span>: <span class="string">"pending"</span>
     },
     <span class="string">"questionnaire_completion"</span>: {
-      <span class="string">"purpose_of_visit"</span>: <span class="keyword">true</span>,
-      <span class="string">"experience_level"</span>: <span class="keyword">true</span>,
-      <span class="string">"risk_acknowledgment"</span>: <span class="keyword">true</span>,
-      <span class="string">"gear_assessment"</span>: <span class="keyword">true</span>,
-      <span class="string">"item_disposal_intent"</span>: <span class="keyword">true</span>
+      <span class="string">"purpose_of_visit"</span>: <span class="boolean">true</span>,
+      <span class="string">"experience_level"</span>: <span class="boolean">true</span>,
+      <span class="string">"risk_acknowledgment"</span>: <span class="boolean">true</span>,
+      <span class="string">"gear_assessment"</span>: <span class="boolean">true</span>,
+      <span class="string">"item_disposal_intent"</span>: <span class="boolean">true</span>
     }
   },
   <span class="string">"analysis"</span>: {
@@ -953,20 +981,48 @@
 logger = logging.getLogger(<span class="string">"mordor-api"</span>)
 
 <span class="keyword">class</span> <span class="function">MordorAPIClient</span>:
-    <span class="keyword">def</span> <span class="function">__init__</span>(self, api_key: str):
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, api_key: str, base_url: str = <span class="string">"https://relaxing-needed-vulture.ngrok-free.app/api"</span>):
         self.api_key = api_key
-        self.base_url = <span class="string">"https://api.mordor-tourism.me/v1"</span> <span class="comment"># Note: Update this base_url with the new endpoint!</span>
+        self.base_url = base_url
+        self.token = <span class="keyword">None</span>
         self.headers = {
-            <span class="string">"Authorization"</span>: <span class="string">f"Bearer {api_key}"</span>,
             <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>
         }
 
+    <span class="keyword">async def</span> <span class="function">authenticate</span>(self):
+        <span class="comment"># Obtain an authentication token</span>
+        <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
+            <span class="keyword">try:</span>
+                <span class="keyword">async with</span> session.post(
+                    <span class="string">f"{self.base_url}/auth"</span>,
+                    json={<span class="string">"api_key"</span>: self.api_key},
+                    headers={<span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>} <span class="comment"># Only content type needed for auth</span>
+                ) <span class="keyword">as</span> response:
+                    <span class="keyword">if</span> response.status == 200:
+                        auth_data = <span class="keyword">await</span> response.json()
+                        self.token = auth_data.get(<span class="string">"token"</span>)
+                        <span class="comment"># Update headers with the obtained token for subsequent requests</span>
+                        self.headers[<span class="string">"Authorization"</span>] = <span class="string">f"Bearer {self.token}"</span>
+                        logger.info(<span class="string">"Authentication successful."</span>)
+                        <span class="keyword">return</span> <span class="keyword">True</span>
+                    <span class="keyword">else:</span>
+                        error_text = <span class="keyword">await</span> response.text()
+                        logger.error(<span class="string">f"Authentication failed: {response.status} - {error_text}"</span>)
+                        <span class="keyword">return</span> <span class="keyword">False</span>
+            <span class="keyword">except</span> aiohttp.ClientError <span class="keyword">as</span> e:
+                logger.error(<span class="string">f"Authentication connection error: {e}"</span>)
+                <span class="keyword">return</span> <span class="keyword">False</span>
+
     <span class="keyword">async def</span> <span class="function">receive_transcripts</span>(self) -> AsyncGenerator[Dict[str, Any], None]:
         <span class="comment"># Stream transcripts from the API</span>
+        <span class="keyword">if not</span> self.token:
+            logger.error(<span class="string">"Not authenticated. Call authenticate() first."</span>)
+            <span class="keyword">return</span>
+
         <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
-            <span class="keyword">try</span>:
+            <span class="keyword">try:</span>
                 <span class="keyword">async with</span> session.get(
-                    <span class="string">f"{self.base_url}/transcripts/stream"</span>,
+                    <span class="string">f"{self.base_url}/v1/transcripts/stream"</span>,
                     headers=self.headers
                 ) <span class="keyword">as</span> response:
                     <span class="keyword">if</span> response.status != 200:
@@ -976,7 +1032,7 @@ logger = logging.getLogger(<span class="string">"mordor-api"</span>)
 
                     <span class="keyword">async for</span> line <span class="keyword">in</span> response.content:
                         <span class="keyword">if</span> line:
-                            <span class="keyword">try</span>:
+                            <span class="keyword">try:</span>
                                 transcript = json.loads(line.decode(<span class="string">'utf-8'</span>))
                                 <span class="keyword">yield</span> transcript
                             <span class="keyword">except</span> json.JSONDecodeError <span class="keyword">as</span> e:
@@ -986,10 +1042,14 @@ logger = logging.getLogger(<span class="string">"mordor-api"</span>)
 
     <span class="keyword">async def</span> <span class="function">submit_processed_result</span>(self, result: Dict[str, Any]) -> Dict[str, Any]:
         <span class="comment"># Submit processed results back to the API</span>
+         <span class="keyword">if not</span> self.token:
+            logger.error(<span class="string">"Not authenticated. Call authenticate() first."</span>)
+            <span class="keyword">return</span> {<span class="string">"error"</span>: <span class="string">"Not authenticated"</span>}
+
         <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
-            <span class="keyword">try</span>:
+            <span class="keyword">try:</span>
                 <span class="keyword">async with</span> session.post(
-                    <span class="string">f"{self.base_url}/transcripts/process"</span>,
+                    <span class="string">f"{self.base_url}/v1/transcripts/process"</span>,
                     headers=self.headers,
                     json=result
                 ) <span class="keyword">as</span> response:
@@ -1005,10 +1065,14 @@ logger = logging.getLogger(<span class="string">"mordor-api"</span>)
 
     <span class="keyword">async def</span> <span class="function">get_stats</span>(self) -> Dict[str, Any]:
         <span class="comment"># Get processing statistics</span>
+        <span class="keyword">if not</span> self.token:
+            logger.error(<span class="string">"Not authenticated. Call authenticate() first."</span>)
+            <span class="keyword">return</span> {<span class="string">"error"</span>: <span class="string">"Not authenticated"</span>}
+
         <span class="keyword">async with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:
             <span class="keyword">try:</span>
                 <span class="keyword">async with</span> session.get(
-                    <span class="string">f"{self.base_url}/stats"</span>,
+                    <span class="string">f"{self.base_url}/v1/stats"</span>,
                     headers=self.headers
                 ) <span class="keyword">as</span> response:
                     <span class="keyword">if</span> response.status != 200:
@@ -1051,36 +1115,42 @@ logging.basicConfig(
         <span class="string">"summary"</span>: <span class="string">"Customer inquired about Mount Doom visit preparations."</span>,
         <span class="string">"structured_data"</span>: {
             <span class="string">"visitor_details"</span>: {
-                <span class="string">"ring_bearer"</span>: <span class="keyword">False</span>,
-                <span class="string">"gear_prepared"</span>: <span class="keyword">True</span>
+                <span class="string">"ring_bearer"</span>: <span class="boolean">False</span>,
+                <span class="string">"gear_prepared"</span>: <span class="boolean">True</span>
             }
         },
         <span class="string">"analysis"</span>: {
-            <span class="string">"sentiment"</span>: 0.78,
+            <span class="string">"sentiment"</span>: <span class="number">0.78</span>,
             <span class="string">"action_items"</span>: [<span class="string">"Send safety information"</span>]
         },
         <span class="string">"processing_timestamp"</span>: <span class="string">"2025-05-03T12:36:00Z"</span>
     }
 
 <span class="keyword">async def</span> <span class="function">main</span>():
-    <span class="comment"># Initialize the client with your API key</span>
-    <span class="comment"># Note: Update the MordorAPIClient initialization with the new endpoint URL!</span>
-    client = MordorAPIClient(<span class="string">"md-5f37e2a8c91b4eeba327dfe51f91ae05"</span>)
+    <span class="comment"># Initialize the client with your API key and the correct base URL</span>
+    client = MordorAPIClient(<span class="string">"candidate-api-key-587e61ac"</span>, <span class="string">"https://relaxing-needed-vulture.ngrok-free.app/api"</span>)
 
-    <span class="comment"># Process a batch of transcripts</span>
-    <span class="keyword">async for</span> transcript <span class="keyword">in</span> client.receive_transcripts():
-        logging.info(<span class="string">f"Received transcript: {transcript['transcript_id']}"</span>)
+    <span class="comment"># Authenticate first</span>
+    authenticated = <span class="keyword">await</span> client.authenticate()
 
-        <span class="comment"># Process the transcript</span>
-        processed_result = <span class="keyword">await</span> process_transcript(transcript)
+    <span class="keyword">if</span> authenticated:
+        <span class="comment"># Process a batch of transcripts</span>
+        <span class="keyword">async for</span> transcript <span class="keyword">in</span> client.receive_transcripts():
+            logging.info(<span class="string">f"Received transcript: {transcript['transcript_id']}"</span>)
 
-        <span class="comment"># Submit the result back to the API</span>
-        response = <span class="keyword">await</span> client.submit_processed_result(processed_result)
-        logging.info(<span class="string">f"Submitted result for {transcript['transcript_id']}: {response}"</span>)
+            <span class="comment"># Process the transcript</span>
+            processed_result = <span class="keyword">await</span> process_transcript(transcript)
 
-    <span class="comment"># Get processing stats</span>
-    stats = <span class="keyword">await</span> client.get_stats()
-    logging.info(<span class="string">f"Processing stats: {stats}"</span>)
+            <span class="comment"># Submit the result back to the API</span>
+            response = <span class="keyword">await</span> client.submit_processed_result(processed_result)
+            logging.info(<span class="string">f"Submitted result for {transcript['transcript_id']}: {response}"</span>)
+
+        <span class="comment"># Get processing stats</span>
+        stats = <span class="keyword">await</span> client.get_stats()
+        logging.info(<span class="string">f"Processing stats: {stats}"</span>)
+    <span class="keyword">else:</span>
+        logging.error(<span class="string">"Could not authenticate. Exiting."</span>)
+
 
 <span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
     asyncio.run(main())</code></pre>
@@ -1140,7 +1210,7 @@ logging.basicConfig(
                 <h3>GETTING STARTED</h3>
                 <div class="terminal-content" style="margin-top: 16px;">
                     <div class="terminal-line">
-                        <span class="terminal-prompt">$</span> git clone https://github.com/mordor-tourism/mount-doom-challenge-starter.git
+                        <span class="terminal-prompt">$</span> git clone https://github.com/CallLive-ai/mount-doom-challenge
                     </div>
                     <div class="terminal-line">
                         <span class="terminal-prompt">$</span> cd mount-doom-challenge-starter
