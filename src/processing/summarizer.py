@@ -1,48 +1,71 @@
 import os
+import logging
 from dotenv import load_dotenv
-import google.generativeai as genai
 
+# Attempt to import the Google Gemini SDK; allow running in mock mode without it
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
+# Load environment variables from .env
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Configure logging
+logger = logging.getLogger("summarizer")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Feature flag: mock summaries to avoid Gemini quota issues
+USE_MOCK_LLM = os.getenv("USE_MOCK_LLM", "false").lower() == "true"
+
+# Gemini setup only if mock is off
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not USE_MOCK_LLM:
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY not set in .env file")
+    if not genai:
+        raise ImportError("google-generativeai SDK is required for real summarization")
+    genai.configure(api_key=GEMINI_API_KEY)
+    genai_model = genai.GenerativeModel("gemini-1.5-flash")
+else:
+    genai_model = None
+
 
 def get_summary_from_transcript(transcript_turns: list[str]) -> str:
     """
-    Generate a concise summary of a customer-agent conversation using Gemini Flash.
-
-    Args:
-        transcript_turns: A list of strings, each representing a line of dialogue.
-
-    Returns:
-        A summary paragraph as a string.
+    Generate a concise summary of a customer-agent conversation.
+    Falls back to mock text or error message if LLM fails.
     """
+    if USE_MOCK_LLM:
+        logger.info("[summarizer] Mock summary mode enabled; returning placeholder.")
+        return "Customer expressed interest in Mount Doom hike and requested booking details."
+
     full_text = "\n".join(transcript_turns)
-
     prompt = f"""
-You are a helpful travel assistant working with a volcanic tourism bureau.
-Summarize the following conversation into 4-5 sentences, focusing on visitor intent, concerns, and next steps.
+You are a helpful travel assistant for a volcanic tourism bureau.
+Summarize the following conversation in 3-4 sentences, focusing on visitor intent, concerns, and suggested next steps.
 
-Transcript:
+Conversation:
 {full_text}
-"""
+
+Return only the summary text without additional formatting.
+""".strip()
 
     try:
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        response = genai_model.generate_content(prompt)
+        summary = response.text.strip()
+        return summary
     except Exception as e:
-        # Graceful fallback with logging
-        print(f"[summarizer] Gemini summarization failed: {e}")
-        return ""  # Return empty string to allow continuation
+        logger.error(f"[summarizer] Summarization failed: {e}")
+        return "Summary unavailable due to an error."
 
 
-# Example
+# Quick manual test
 if __name__ == "__main__":
-    sample = [
-        "agent: Hello, this is Doom Services AI. I understand you're interested in visiting Mount Doom.",
-        "customer: Yes! I'm really excited but a bit worried about what to bring.",
-        "agent: Safety is key — do you have mountaineering experience?",
-        "customer: Not really... this is my first real volcano hike."
+    sample_conversation = [
+        "agent: Hello, this is Doom Services AI. How can I assist today?",
+        "customer: I'm interested in visiting Mount Doom but unsure about safety.",
+        "agent: What gear do you currently have?",
+        "customer: Just regular hiking boots."
     ]
-    print(get_summary_from_transcript(sample))
+    print(get_summary_from_transcript(sample_conversation))

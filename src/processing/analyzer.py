@@ -2,8 +2,13 @@
 import os
 import re
 import json
+import logging
 from dotenv import load_dotenv
 import google.generativeai as genai
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("analyzer")
 
 # Load environment variables
 load_dotenv()
@@ -20,21 +25,7 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 def analyze_insights(transcript_turns: list[str], structured_data: dict) -> dict:
     """
     Analyze conversation insights: sentiment, interest level, preparedness, and action items.
-
-    Args:
-        transcript_turns: List of conversation lines.
-        structured_data: Dict produced by get_structured_data (visitor_details & questionnaire_completion).
-
-    Returns:
-        A dict with keys:
-        {
-          "sentiment": float,            # 0.0 (negative) to 1.0 (positive)
-          "interest_level": "low"/"medium"/"high",
-          "preparedness_level": "low"/"medium"/"high",
-          "action_items": [str, ...]     # follow-up tasks
-        }
     """
-    # Combine transcript and structured data into prompt
     conversation_text = "\n".join(transcript_turns)
     structured_json = json.dumps(structured_data)
 
@@ -54,16 +45,17 @@ Structured Visitor Details:
 {structured_json}
 
 Return just the JSON object with these keys, no additional text.
-"""
+""".strip()
+
     try:
         response = model.generate_content(prompt)
-        text = response.text.strip()
-        # Strip markdown fences if present
-        cleaned = re.sub(r"^```json\s*|\s*```$", "", text, flags=re.MULTILINE).strip()
+        response_text = response.text.strip()
+        cleaned = re.sub(r"^```json\s*|\s*```$", "", response_text, flags=re.MULTILINE).strip()
         return json.loads(cleaned)
+
     except Exception as e:
-        print(f"[analyzer] Parsing failed: {e}\nResponse was: {text}")
-        # Fallback defaults
+        logger.error(f"[analyzer] Analysis failed: {e}")
+        # Do not reference `response_text` if not set
         return {
             "sentiment": 0.5,
             "interest_level": "medium",
@@ -71,7 +63,7 @@ Return just the JSON object with these keys, no additional text.
             "action_items": []
         }
 
-# Example usage for local testing
+# Example usage
 if __name__ == "__main__":
     sample_convo = [
         "agent: Do you have safety gear?",
