@@ -61,7 +61,7 @@ pip install -r requirements.txt
 ```env
 GEMINI_API_KEY=your_google_gemini_key
 CALLLIVE_API_KEY=candidate-api-key-fff031f8
-MONGODB_URI=mongodb+srv://calluser:%23Ppk9420@cluster0.bzgev.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URI=mongodb+srv://<username>:<userpassword>@cluster0.bzgev.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 USE_MOCK_LLM=true
 ```
 
