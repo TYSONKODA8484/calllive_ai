@@ -3,39 +3,61 @@ import re
 import json
 import logging
 from dotenv import load_dotenv
-import google.generativeai as genai
-from typing import List, Dict, Any
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Attempt to import the Google Gemini SDK; allow running in mock mode without it
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
+from typing import List, Dict, Any
 
 # Load environment variables
 load_dotenv()
 
-# Configure Gemini with API key
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not set in .env file")
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("extractor")
 
-genai.configure(api_key=api_key)
+# Feature flag: use mock extractor outputs to avoid Gemini quota issues (optional)
+USE_MOCK_LLM = os.getenv("USE_MOCK_LLM", "false").lower() == "true"
 
-# Instantiate the Gemini model (Flash for speed)
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Gemini setup only if mock is off
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not USE_MOCK_LLM:
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY not set in .env file")
+    if not genai:
+        raise ImportError("google-generativeai SDK is required for real extraction")
+    genai.configure(api_key=GEMINI_API_KEY)
+    # Use Gemini 2.0 Flash Lite for higher rate limits
+    model = genai.GenerativeModel("gemini-2.0-flash-lite")
+else:
+    model = None
+
 
 def get_structured_data(transcript_turns: List[str], metadata: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract structured visitor details and questionnaire completion status.
 
-    Args:
-        transcript_turns: List of transcript dialogue strings.
-        metadata: Metadata containing questionnaire and permit info.
-
-    Returns:
-        Dict with keys:
-        - visitor_details
-        - questionnaire_completion
+    Returns keys:
+    - visitor_details
+    - questionnaire_completion
     """
+    # Mock fallback
+    if USE_MOCK_LLM:
+        logger.info("[extractor] Mock extractor mode enabled; returning placeholder.")
+        return {
+            "visitor_details": {
+                "ring_bearer": False,
+                "gear_prepared": False,
+                "hazard_knowledge": "none",
+                "fitness_level": "medium",
+                "permit_status": metadata.get("mount_doom_permit_status", "pending")
+            },
+            "questionnaire_completion": metadata.get("questionnaire", {})
+        }
+
     full_text = "\n".join(transcript_turns)
     questionnaire_json = json.dumps(metadata.get("questionnaire", {}), indent=2)
 
@@ -62,13 +84,13 @@ Return only the JSON object without any additional text, markdown, or comments.
 
     try:
         response = model.generate_content(prompt)
-        text = response.text.strip()
-        # Remove markdown formatting like ```json
-        cleaned = re.sub(r"^```(?:json)?|```$", "", text, flags=re.MULTILINE).strip()
+        response_text = response.text.strip()
+        cleaned = re.sub(r"^```(?:json)?|```$", "", response_text, flags=re.MULTILINE).strip()
         return json.loads(cleaned)
 
     except Exception as e:
         logger.error(f"[extractor] Gemini extraction failed: {e}")
+        # Graceful fallback
         return {
             "visitor_details": {
                 "ring_bearer": None,

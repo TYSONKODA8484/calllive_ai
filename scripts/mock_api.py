@@ -20,8 +20,16 @@ sample_transcripts = [
         "duration_seconds": 120 + i,
         "participants": {"agent": "Doom Services AI", "customer": f"User{i}"},
         "transcript_text": [
-            {"speaker": "agent", "text": "Hello! Welcome to Mount Doom tours.", "timestamp": datetime.now(timezone.utc).isoformat()},
-            {"speaker": "customer", "text": "I want to book a hike.", "timestamp": datetime.now(timezone.utc).isoformat()}
+            {
+                "speaker": "agent",
+                "text": "Hello! Welcome to Mount Doom tours.",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            },
+            {
+                "speaker": "customer",
+                "text": "I want to book a hike.",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
         ],
         "metadata": {
             "questionnaire": {"purpose_of_visit_asked": True, "gear_discussed": False},

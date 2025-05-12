@@ -4,28 +4,52 @@ import re
 import json
 import logging
 from dotenv import load_dotenv
-import google.generativeai as genai
+
+# Attempt to import the Google Gemini SDK; allow running in mock mode
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
 
 # Setup logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("analyzer")
 
 # Load environment variables
-load_dotenv()
+dotenv_path = os.getenv('ENV_PATH', None)
+load_dotenv(dotenv_path)
 
-# Configure Gemini with your API key
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not set in .env file")
-genai.configure(api_key=api_key)
+# Feature flag: mock analysis to avoid Gemini quota issues
+USE_MOCK_LLM = os.getenv("USE_MOCK_LLM", "false").lower() == "true"
 
-# Instantiate the model (Gemini Flash for speed)
-model = genai.GenerativeModel("gemini-1.5-flash")
+# Configure Gemini only if not mocking
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not USE_MOCK_LLM:
+    if not GEMINI_API_KEY:
+        raise ValueError("GEMINI_API_KEY not set in .env file")
+    if not genai:
+        raise ImportError("google-generativeai SDK is required for real analysis")
+    genai.configure(api_key=GEMINI_API_KEY)
+    # Use Gemini 2.0 Flash Lite for higher rate limits
+    model = genai.GenerativeModel("gemini-2.0-flash-lite")
+else:
+    model = None
+
 
 def analyze_insights(transcript_turns: list[str], structured_data: dict) -> dict:
     """
     Analyze conversation insights: sentiment, interest level, preparedness, and action items.
     """
+    # Mock fallback
+    if USE_MOCK_LLM:
+        logger.info("[analyzer] Mock analysis mode enabled; returning placeholder.")
+        return {
+            "sentiment": 0.5,
+            "interest_level": "medium",
+            "preparedness_level": "medium",
+            "action_items": []
+        }
+
     conversation_text = "\n".join(transcript_turns)
     structured_json = json.dumps(structured_data)
 
@@ -55,13 +79,14 @@ Return just the JSON object with these keys, no additional text.
 
     except Exception as e:
         logger.error(f"[analyzer] Analysis failed: {e}")
-        # Do not reference `response_text` if not set
+        # Safe fallback
         return {
             "sentiment": 0.5,
             "interest_level": "medium",
             "preparedness_level": "medium",
             "action_items": []
         }
+
 
 # Example usage
 if __name__ == "__main__":

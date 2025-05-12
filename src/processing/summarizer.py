@@ -26,7 +26,8 @@ if not USE_MOCK_LLM:
     if not genai:
         raise ImportError("google-generativeai SDK is required for real summarization")
     genai.configure(api_key=GEMINI_API_KEY)
-    genai_model = genai.GenerativeModel("gemini-1.5-flash")
+    # Use Gemini 2.0 Flash Lite for higher rate limits
+    genai_model = genai.GenerativeModel("gemini-2.0-flash-lite")
 else:
     genai_model = None
 
@@ -36,10 +37,12 @@ def get_summary_from_transcript(transcript_turns: list[str]) -> str:
     Generate a concise summary of a customer-agent conversation.
     Falls back to mock text or error message if LLM fails.
     """
+    # Mock mode for rapid local development and to avoid API limits
     if USE_MOCK_LLM:
         logger.info("[summarizer] Mock summary mode enabled; returning placeholder.")
         return "Customer expressed interest in Mount Doom hike and requested booking details."
 
+    # Combine transcript lines into a single text block
     full_text = "\n".join(transcript_turns)
     prompt = f"""
 You are a helpful travel assistant for a volcanic tourism bureau.
@@ -55,12 +58,13 @@ Return only the summary text without additional formatting.
         response = genai_model.generate_content(prompt)
         summary = response.text.strip()
         return summary
+
     except Exception as e:
         logger.error(f"[summarizer] Summarization failed: {e}")
         return "Summary unavailable due to an error."
 
 
-# Quick manual test
+# quick test
 if __name__ == "__main__":
     sample_conversation = [
         "agent: Hello, this is Doom Services AI. How can I assist today?",

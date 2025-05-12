@@ -1,3 +1,12 @@
 # docker-compose
 
 # Placeholder for service orchestration
+version: '3.9'
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: python -m src.app

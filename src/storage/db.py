@@ -6,19 +6,22 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+dotenv_loaded = load_dotenv()
 
 # Configure logging
 logger = logging.getLogger("db")
 logging.basicConfig(level=logging.INFO)
 
-# Determine storage mode
+# Error tracking file
+ERRORS_FILE = "errors.json"
+
+# Determine storage mode: MongoDB or JSON fallback
 MONGO_URI = os.getenv("MONGODB_URI")
 USE_MONGO = False
 _raw_collection = None
 _processed_collection = None
 
-# Try connecting to MongoDB
+# Attempt MongoDB connection
 try:
     from pymongo import MongoClient
     client = MongoClient(
@@ -36,13 +39,13 @@ except Exception as e:
     USE_MONGO = False
     logger.error(f"MongoDB connection failed: {e}. Falling back to JSON storage.")
 
-# File-based fallback
+# JSON file paths for fallback
 RAW_JSON_FILE = "raw_transcripts.json"
 PROCESSED_JSON_FILE = "processed_results.json"
 
 async def save_raw_transcript(transcript: dict) -> None:
     """
-    Save raw transcript to MongoDB or JSON.
+    Save raw transcript to MongoDB or append to JSON file.
     """
     if USE_MONGO and _raw_collection:
         try:
@@ -51,22 +54,21 @@ async def save_raw_transcript(transcript: dict) -> None:
         except Exception as e:
             logger.error(f"Failed to save raw transcript to MongoDB: {e}")
     else:
+        entry = {
+            **transcript,
+            "saved_timestamp": datetime.now(timezone.utc).isoformat() + "Z"
+        }
         try:
-            entry = {
-                **transcript,
-                "saved_timestamp": datetime.now(timezone.utc).isoformat() + "Z"
-            }
-            def write_json():
-                with open(RAW_JSON_FILE, "a") as f:
-                    f.write(json.dumps(entry) + "\n")
-            await asyncio.to_thread(write_json)
+            await asyncio.to_thread(
+                lambda: open(RAW_JSON_FILE, "a").write(json.dumps(entry) + "\n")
+            )
             logger.info(f"Saved raw transcript {transcript.get('transcript_id')} to JSON file.")
         except Exception as e:
             logger.error(f"Failed to save raw transcript to JSON file: {e}")
 
 async def save_processed_result(result: dict) -> None:
     """
-    Save processed result to MongoDB or JSON.
+    Save processed result to MongoDB or append to JSON file.
     """
     if USE_MONGO and _processed_collection:
         try:
@@ -76,10 +78,21 @@ async def save_processed_result(result: dict) -> None:
             logger.error(f"Failed to save processed result to MongoDB: {e}")
     else:
         try:
-            def write_json():
-                with open(PROCESSED_JSON_FILE, "a") as f:
-                    f.write(json.dumps(result) + "\n")
-            await asyncio.to_thread(write_json)
+            await asyncio.to_thread(
+                lambda: open(PROCESSED_JSON_FILE, "a").write(json.dumps(result) + "\n")
+            )
             logger.info(f"Saved processed result {result.get('transcript_id')} to JSON file.")
         except Exception as e:
             logger.error(f"Failed to save processed result to JSON file: {e}")
+
+async def save_error(error_entry: dict) -> None:
+    """
+    Append an error record to the errors JSON file.
+    """
+    try:
+        await asyncio.to_thread(
+            lambda: open(ERRORS_FILE, "a").write(json.dumps(error_entry) + "\n")
+        )
+        logger.error(f"Logged pipeline error: {error_entry}")
+    except Exception as e:
+        logger.error(f"Failed to save error to JSON file: {e}")

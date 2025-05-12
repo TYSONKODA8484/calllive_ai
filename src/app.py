@@ -4,99 +4,111 @@ import logging
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Import API client and processing/storage modules
 from src.api.client import MordorAPIClient
 from src.processing.summarizer import get_summary_from_transcript
 from src.processing.extractor import get_structured_data
 from src.processing.analyzer import analyze_insights
-from src.storage.db import save_raw_transcript, save_processed_result
+from src.storage.db import save_raw_transcript, save_processed_result, save_error
 
-# Import queue utilities
-from src.queue.queue import create_queue, start_workers, enqueue_item, wait_for_completion
+# Load environment
+load_dotenv()
+CALLLIVE_API_KEY = os.getenv("CALLLIVE_API_KEY")
+CALLLIVE_BASE_URL = os.getenv("CALLLIVE_BASE_URL")
+if not CALLLIVE_API_KEY or not CALLLIVE_BASE_URL:
+    logging.error("CALLLIVE_API_KEY or CALLLIVE_BASE_URL not set in .env")
+    raise SystemExit(1)
 
-# Configure logging for observability
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+# Configure logging
+tlogging = logging.getLogger()
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Number of concurrent workers (configurable via .env)
-WORKER_COUNT = int(os.getenv("WORKER_COUNT", 5))
-QUEUE_MAXSIZE = int(os.getenv("QUEUE_MAXSIZE", 100))
+# Rate limiter for submissions
+class RateLimiter:
+    def __init__(self, max_calls: int, period: int):
+        self._semaphore = asyncio.Semaphore(max_calls)
+        self._max = max_calls
+        self._period = period
+        asyncio.create_task(self._refill())
 
-async def process_worker(queue: asyncio.Queue, client: MordorAPIClient):
-    """
-    Worker coroutine to process transcripts from the queue.
-    """
+    async def _refill(self):
+        while True:
+            await asyncio.sleep(self._period)
+            to_release = self._max - self._semaphore._value
+            for _ in range(to_release):
+                self._semaphore.release()
+
+    async def acquire(self):
+        await self._semaphore.acquire()
+
+async def process_worker(client: MordorAPIClient, rate_limiter: RateLimiter, queue: asyncio.Queue):
     while True:
         transcript = await queue.get()
         transcript_id = transcript.get("transcript_id")
         logging.info(f"[worker] Processing transcript {transcript_id}")
-
-        # Prepare data for processing
-        transcript_turns = [f"{turn['speaker']}: {turn['text']}" for turn in transcript.get('transcript_text', [])]
-        metadata = transcript.get('metadata', {})
-
-        # 1. Save raw transcript
-        await save_raw_transcript(transcript)
-
-        # 2. Generate summary (run in thread to avoid blocking)
-        summary = await asyncio.to_thread(get_summary_from_transcript, transcript_turns)
-
-        # 3. Extract structured data
-        structured = await asyncio.to_thread(get_structured_data, transcript_turns, metadata)
-
-        # 4. Analyze insights
-        analysis = await asyncio.to_thread(analyze_insights, transcript_turns, structured)
-
-        # Build the result payload
-        result = {
-            "transcript_id": transcript_id,
-            "summary": summary,
-            "structured_data": structured,
-            "analysis": analysis,
-            "processing_timestamp": datetime.utcnow().isoformat() + "Z"
-        }
-
-        # 5. Save processed result
-        await save_processed_result(result)
-
-        # 6. Submit to API
         try:
+            # 1. Save raw transcript
+            await save_raw_transcript(transcript)
+
+            # 2. Summarize, extract, analyze
+            turns = [turn["text"] for turn in transcript.get("transcript_text", [])]
+            summary = get_summary_from_transcript(turns)
+            structured = get_structured_data(turns, transcript.get("metadata", {}))
+            analysis = analyze_insights(turns, structured)
+
+            # 3. Build result payload
+            result = {
+                "transcript_id": transcript_id,
+                "summary": summary,
+                "structured_data": structured,
+                "analysis": {
+                    **analysis,
+                    "processing_timestamp": datetime.utcnow().isoformat() + "Z"
+                }
+            }
+
+            # 4. Save processed result
+            await save_processed_result(result)
+
+            # 5. Throttle and submit to API
+            await rate_limiter.acquire()
             response = await client.submit_processed_result(result)
             logging.info(f"[worker] Submitted {transcript_id}: {response}")
         except Exception as e:
-            logging.error(f"[worker] Submission failed for {transcript_id}: {e}")
-
-        queue.task_done()
+            # Log and record the error
+            error_entry = {
+                "timestamp": datetime.utcnow().isoformat() + "Z",
+                "transcript_id": transcript_id,
+                "error": str(e)
+            }
+            await save_error(error_entry)
+            logging.error(f"[worker] Error processing {transcript_id}: {e}")
+        finally:
+            queue.task_done()
 
 async def main():
-    # Load environment variables
-    load_dotenv()
-    api_key = os.getenv("CALLLIVE_API_KEY")
-    base_url = os.getenv("CALLLIVE_BASE_URL")
-
-    if not api_key or not base_url:
-        logging.error("CALLLIVE_API_KEY or CALLLIVE_BASE_URL not set in .env")
-        return
-
-    # Authenticate with the CallLive API
-    client = MordorAPIClient(api_key, base_url)
+    # Initialize API client and authenticate
+    client = MordorAPIClient(CALLLIVE_API_KEY, CALLLIVE_BASE_URL)
     if not await client.authenticate():
         logging.error("Authentication failed. Exiting.")
         return
 
-    # Initialize queue and start workers
-    queue = create_queue(maxsize=QUEUE_MAXSIZE)
-    start_workers(queue, process_worker, client, WORKER_COUNT)
+    # Setup queue and rate limiter
+    queue = asyncio.Queue()
+    rate_limiter = RateLimiter(100, 60)  # 100 submits per 60 seconds
 
-    # Stream transcripts and enqueue for processing
+    # Launch worker tasks
+    workers = [asyncio.create_task(process_worker(client, rate_limiter, queue)) for _ in range(10)]
+
+    # Stream and enqueue transcripts
     async for transcript in client.receive_transcripts():
-        logging.info(f"[main] Enqueuing transcript {transcript.get('transcript_id')}")
-        enqueue_item(queue, transcript)
+        tid = transcript.get("transcript_id")
+        logging.info(f"[main] Enqueuing transcript {tid}")
+        await queue.put(transcript)
 
-    # Wait until all enqueued items are processed
-    await wait_for_completion(queue)
+    # Wait for all tasks to finish
+    await queue.join()
+    for w in workers:
+        w.cancel()
 
 if __name__ == "__main__":
     asyncio.run(main())
